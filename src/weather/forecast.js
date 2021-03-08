@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const { getDataRange } = require("../utils");
 
 const forecast = async (location, startDate, endDate) => {
   const url = `http://api.weatherapi.com/v1/history.json?key=${process.env.WEATHERAPI_KEY}&q=${location}&dt=${startDate}&end_dt=${endDate}`;
@@ -12,4 +13,16 @@ const forecast = async (location, startDate, endDate) => {
   return response;
 };
 
-module.exports = forecast;
+const getWeatherData = async () => {
+  const cities = ["Kyitev", "Minsk"];
+
+  const { startDate, currentDate } = getDataRange();
+  const promices = cities.map((city) => forecast(city, startDate, currentDate));
+
+  const data = await Promise.allSettled(promices).then((values) => values);
+
+  console.log(data);
+  return data.map((el) => el.value);
+};
+
+module.exports = getWeatherData;

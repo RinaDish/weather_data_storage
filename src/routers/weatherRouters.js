@@ -1,21 +1,20 @@
-const express = require("express");
+const express = require('express');
+const db = require('../db/db');
 const {
   successResponse,
   failureResponse,
   isRowExist,
   getCityId,
-} = require("./../utils");
-const db = require("./../db/db");
+} = require('../utils');
 
 const router = new express.Router();
 
 // Get list of cities
-router.get("/city/list", async (req, res) => {
+router.get('/city/list', async (req, res) => {
   try {
     // Get list of cities
-    const cities = await db.query(`SELECT name, country from cities;`);
-    if (!isRowExist(cities))
-      return failureResponse(res, "Cities not found", 404);
+    const cities = await db.query('SELECT name, country from cities;');
+    if (!isRowExist(cities)) return failureResponse(res, 'Cities not found', 404);
 
     return successResponse(res, cities.rows);
   } catch (e) {
@@ -25,31 +24,29 @@ router.get("/city/list", async (req, res) => {
 
 // Get weather in the city by date
 // GET /city/London?dt=2021-03-01
-router.get("/city/:city", async (req, res) => {
+router.get('/city/:city', async (req, res) => {
   try {
     // Get weather and update request counter
     const cityName = req.params.city;
     const date = req.query.dt;
 
     const cityRow = await getCityId(cityName);
-    if (!isRowExist(cityRow))
-      return failureResponse(res, "City not found", 404);
+    if (!isRowExist(cityRow)) return failureResponse(res, 'City not found', 404);
 
     // Increment requests field in cities table
     await db.query(
       `UPDATE cities
         SET requests = requests + 1
         WHERE name=$1;`,
-      [cityName]
+      [cityName],
     );
 
     const weather = await db.query(
-      `SELECT * from weather WHERE city_id=$1 AND date=$2`,
-      [cityRow.rows[0].id, date]
+      'SELECT * from weather WHERE city_id=$1 AND date=$2',
+      [cityRow.rows[0].id, date],
     );
 
-    if (!isRowExist(weather))
-      return failureResponse(res, "Weather data not found", 404);
+    if (!isRowExist(weather)) return failureResponse(res, 'Weather data not found', 404);
 
     return successResponse(res, weather.rows);
   } catch (e) {
@@ -58,22 +55,22 @@ router.get("/city/:city", async (req, res) => {
 });
 
 // Get average temperature in the city
-router.get("/avgtemp/:city", async ({ params }, res) => {
+router.get('/avgtemp/:city', async ({ params }, res) => {
   try {
     // Get average temperature
     const cityRow = await getCityId(params.city);
-    if (!isRowExist(cityRow))
-      return failureResponse(res, "City not found", 404);
+    if (!isRowExist(cityRow)) return failureResponse(res, 'City not found', 404);
 
     const avgtempRow = await db.query(
       `SELECT AVG(CAST(avgtemp_c as float))
         FROM weather
-        WHERE city_id=2;`
+        WHERE city_id=$1;`,
+      [cityRow.rows[0].id],
     );
-    if (!isRowExist(avgtempRow))
-      return failureResponse(res, "Average temperature not found", 404);
+    if (!isRowExist(avgtempRow)) return failureResponse(res, 'Average temperature not found', 404);
 
-    const avgTemp = avgtempRow.rows[0].avg;
+    // To round to 1 sign after decimal
+    const avgTemp = Math.round(avgtempRow.rows[0].avg * 10) / 10;
     return successResponse(res, { avgTemp }, 200);
   } catch (e) {
     return failureResponse(res, e);
@@ -81,7 +78,7 @@ router.get("/avgtemp/:city", async ({ params }, res) => {
 });
 
 // Get the most popular city
-router.get("/popular", async (req, res) => {
+router.get('/popular', async (req, res) => {
   try {
     // Get the most popular city
     const popularRow = await db.query(
@@ -89,11 +86,10 @@ router.get("/popular", async (req, res) => {
         FROM cities
         WHERE requests IN (SELECT MAX(requests) FROM cities GROUP BY name)
         ORDER BY requests desc
-        LIMIT 1;`
+        LIMIT 1;`,
     );
-    if (!isRowExist(popularRow))
-      return failureResponse(res, "Average temperature not found", 404);
-    
+    if (!isRowExist(popularRow)) return failureResponse(res, 'Average temperature not found', 404);
+
     return successResponse(res, popularRow.rows[0]);
   } catch (e) {
     return failureResponse(res, e);

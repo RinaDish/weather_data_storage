@@ -1,11 +1,11 @@
-const fetch = require("node-fetch");
-const { getDateRange } = require("../utils");
+const fetch = require('node-fetch');
+const { getDateRange } = require('../utils');
 
 const forecast = (startDate, endDate) => async (location) => {
   const url = `http://api.weatherapi.com/v1/history.json?key=${process.env.WEATHERAPI_KEY}&q=${location}&dt=${startDate}&end_dt=${endDate}`;
 
   const response = await fetch(url)
-    .then((response) => response.json())
+    .then((res) => res.json())
     .catch((e) => e);
   if (response.error) return { error: response.error.message };
   if (response.message) return { error: response.message };
@@ -16,10 +16,10 @@ const forecast = (startDate, endDate) => async (location) => {
 const structureWeatherData = (weatherData) => {
   const filtered = weatherData.filter((e) => !e.error);
 
-  return filtered.map(({ location: { name, country }, forecast }) => ({
+  return filtered.map(({ location: { name, country }, forecast: { forecastday } }) => ({
     name,
     country,
-    weather: forecast.forecastday.map(({ date, day }) => ({
+    weather: forecastday.map(({ date, day }) => ({
       date,
       maxtemp_c: day.maxtemp_c,
       mintemp_c: day.mintemp_c,
@@ -34,7 +34,7 @@ const structureWeatherData = (weatherData) => {
 };
 
 const getWeatherData = async () => {
-  const cities = ["Kiev", "Minsk"];
+  const cities = ['Kiev', 'Minsk'];
 
   const { startDate, currentDate } = getDateRange();
   const promices = cities.map(forecast(startDate, currentDate));

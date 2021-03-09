@@ -13,16 +13,35 @@ const forecast = async (location, startDate, endDate) => {
   return response;
 };
 
+const structureWeatherData = (weatherData) => {
+  const filtered = weatherData.filter((e) => !e.error);
+  
+  return filtered.map(({ location, forecast }) => ({
+    name: location.name,
+    country: location.country,
+    weather: forecast.forecastday.map(({ date, day }) => ({
+      date,
+      maxtemp_c: day.maxtemp_c,
+      mintemp_c: day.mintemp_c,
+      avgtemp_c: day.avgtemp_c,
+      maxwind_kph: day.maxwind_kph,
+      totalprecip_mm: day.totalprecip_mm,
+      avgvis_km: day.avgvis_km,
+      avghumidity: day.avghumidity,
+      condition: day.condition.text,
+    })),
+  }));
+};
+
 const getWeatherData = async () => {
-  const cities = ["Kyitev", "Minsk"];
+  const cities = ["Kiev", "Minsk"];
 
   const { startDate, currentDate } = getDateRange();
   const promices = cities.map((city) => forecast(city, startDate, currentDate));
 
   const data = await Promise.allSettled(promices).then((values) => values);
 
-  console.log(data);
-  return data.map((el) => el.value);
+  return structureWeatherData(data.map((el) => el.value));
 };
 
 module.exports = getWeatherData;

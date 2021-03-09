@@ -26,7 +26,7 @@ router.get("/city/:city", async (req, res) => {
 });
 
 // Get average temperature in the city
-router.get("/averagetemp/:city", async (req, res) => {
+router.get("/avgtemp/:city", async (req, res) => {
   try {
     // Get average temperature
     return successResponse(res, data);

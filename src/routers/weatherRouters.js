@@ -1,5 +1,6 @@
 const express = require("express");
-const { successResponse, failureResponse } = require("./../utils");
+const { successResponse, failureResponse, isRowExist } = require("./../utils");
+const db = require("./../db/db");
 
 const router = new express.Router();
 const data = "";
@@ -8,7 +9,11 @@ const data = "";
 router.get("/city/list", async (req, res) => {
   try {
     // Get list of cities
-    return successResponse(res, "ok list");
+    const cities = await db.query(`SELECT name, country from cities;`);
+    if (!isRowExist(cityRow))
+      return failureResponse(res, "Cities not found", 404);
+
+    return successResponse(res, cities.rows);
   } catch (e) {
     return failureResponse(res, e);
   }
@@ -18,8 +23,33 @@ router.get("/city/list", async (req, res) => {
 // GET /city/London?dt=2021-03-01
 router.get("/city/:city", async (req, res) => {
   try {
-    // Get weather
-    return successResponse(res, data);
+    // Get weather and update request counter
+    const cityName = req.params.city;
+    const date = req.query.dt;
+    const cityRow = await db.query(`SELECT id from cities WHERE name=$1;`, [
+      cityName,
+    ]);
+
+    if (!isRowExist(cityRow))
+      return failureResponse(res, "City not found", 404);
+
+    // Increment requests field in cities table
+    await db.query(
+      `UPDATE cities
+        SET requests = requests + 1
+        WHERE name=$1;`,
+      [cityName]
+    );
+
+    const weather = await db.query(
+      `SELECT * from weather WHERE city_id=$1 AND date=$2`,
+      [cityRow.rows[0].id, date]
+    );
+
+    if (!isRowExist(weather))
+      return failureResponse(res, "Weather data not found", 404);
+
+    return successResponse(res, weather.rows);
   } catch (e) {
     return failureResponse(res, e);
   }

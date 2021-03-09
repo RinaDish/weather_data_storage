@@ -11,7 +11,7 @@ app.get("/", async (req, res) => {
   const forecast = await getWeatherData();
   const inserting = await insertData(forecast);
 
-  res.json(forecast);
+  res.json(inserting);
 });
 
 app.use(weatherRouter);

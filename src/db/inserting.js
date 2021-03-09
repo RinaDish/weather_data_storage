@@ -25,23 +25,28 @@ const insertWeatherRow = async (day, cityId) => {
   );
 
   if (!isRowExist(weatherRow)) {
-    await db.query(
+    const weatherRow = await db.query(
       `INSERT INTO weather 
           (date, maxtemp_c, mintemp_c, avgtemp_c, maxwind_kph, totalprecip_mm, avgvis_km, avghumidity, condition, city_id ) 
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`,
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;`,
       [...Object.values(day), cityId]
     );
+    return weatherRow.rows[0];
   }
+  return;
 };
 
 const insertData = async (weatherData) => {
+  const rows = [];
   for (const city of weatherData) {
     const cityId = await getCityId(city);
 
     for (const day of city.weather) {
-      await insertWeatherRow(day, cityId);
+      const weatherRow = await insertWeatherRow(day, cityId);
+      if (weatherRow) rows.push(weatherRow);
     }
   }
+  return rows;
 };
 
 module.exports = insertData;

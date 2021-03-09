@@ -8,7 +8,6 @@ const {
 const db = require("./../db/db");
 
 const router = new express.Router();
-const data = "";
 
 // Get list of cities
 router.get("/city/list", async (req, res) => {

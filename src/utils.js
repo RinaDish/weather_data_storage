@@ -7,6 +7,13 @@ const getDateRange = () => {
   return { currentDate, startDate };
 };
 
+const isEqualDate = (lastDateInDbRow) => {
+  const lastDate = lastDateInDbRow.rows[0] ? lastDateInDbRow.rows[0].date : '';
+
+  const currentDate = moment(new Date()).format('YYYY-MM-DD');
+
+  return lastDate === currentDate;
+};
 const successResponse = (response, data, status = 200) => response.status(status).send(data);
 
 const failureResponse = (response, error, status = 400) => {
@@ -22,9 +29,10 @@ const getCityId = async (cityName) => {
 };
 
 module.exports = {
-  getDateRange,
   successResponse,
   failureResponse,
+  getDateRange,
+  isEqualDate,
   isRowExist,
   getCityId,
 };

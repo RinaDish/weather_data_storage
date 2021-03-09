@@ -12,4 +12,6 @@ const successResponse = (response, data, status = 200) =>
 const failureResponse = (response, error, status = 400) =>
   response.status(status).send(error);
 
-module.exports = { getDateRange, successResponse, failureResponse };
+const isRowExist = (data) => data.rows.length !== 0;
+
+module.exports = { getDateRange, successResponse, failureResponse, isRowExist};

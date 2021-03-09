@@ -85,7 +85,17 @@ router.get("/avgtemp/:city", async ({ params }, res) => {
 router.get("/popular", async (req, res) => {
   try {
     // Get the most popular city
-    return successResponse(res, data);
+    const popularRow = await db.query(
+      `SELECT name, country
+        FROM cities
+        WHERE requests IN (SELECT MAX(requests) FROM cities GROUP BY name)
+        ORDER BY requests desc
+        LIMIT 1;`
+    );
+    if (!isRowExist(popularRow))
+      return failureResponse(res, "Average temperature not found", 404);
+    
+    return successResponse(res, popularRow.rows[0]);
   } catch (e) {
     return failureResponse(res, e);
   }

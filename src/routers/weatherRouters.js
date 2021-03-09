@@ -1,5 +1,10 @@
 const express = require("express");
-const { successResponse, failureResponse, isRowExist } = require("./../utils");
+const {
+  successResponse,
+  failureResponse,
+  isRowExist,
+  getCityId,
+} = require("./../utils");
 const db = require("./../db/db");
 
 const router = new express.Router();
@@ -10,7 +15,7 @@ router.get("/city/list", async (req, res) => {
   try {
     // Get list of cities
     const cities = await db.query(`SELECT name, country from cities;`);
-    if (!isRowExist(cityRow))
+    if (!isRowExist(cities))
       return failureResponse(res, "Cities not found", 404);
 
     return successResponse(res, cities.rows);
@@ -26,10 +31,8 @@ router.get("/city/:city", async (req, res) => {
     // Get weather and update request counter
     const cityName = req.params.city;
     const date = req.query.dt;
-    const cityRow = await db.query(`SELECT id from cities WHERE name=$1;`, [
-      cityName,
-    ]);
 
+    const cityRow = await getCityId(cityName);
     if (!isRowExist(cityRow))
       return failureResponse(res, "City not found", 404);
 
@@ -56,10 +59,23 @@ router.get("/city/:city", async (req, res) => {
 });
 
 // Get average temperature in the city
-router.get("/avgtemp/:city", async (req, res) => {
+router.get("/avgtemp/:city", async ({ params }, res) => {
   try {
     // Get average temperature
-    return successResponse(res, data);
+    const cityRow = await getCityId(params.city);
+    if (!isRowExist(cityRow))
+      return failureResponse(res, "City not found", 404);
+
+    const avgtempRow = await db.query(
+      `SELECT AVG(CAST(avgtemp_c as float))
+        FROM weather
+        WHERE city_id=2;`
+    );
+    if (!isRowExist(avgtempRow))
+      return failureResponse(res, "Average temperature not found", 404);
+
+    const avgTemp = avgtempRow.rows[0].avg;
+    return successResponse(res, { avgTemp }, 200);
   } catch (e) {
     return failureResponse(res, e);
   }

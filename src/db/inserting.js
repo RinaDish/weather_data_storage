@@ -35,17 +35,12 @@ const insertWeatherRow = async (day, cityId) => {
 };
 
 const insertData = async (weatherData) => {
-  try {
-    for (const city of weatherData) {
-      const cityId = await getCityId(city);
+  for (const city of weatherData) {
+    const cityId = await getCityId(city);
 
-      for (const day of city.weather) {
-        await insertWeatherRow(day, cityId);
-      }
+    for (const day of city.weather) {
+      await insertWeatherRow(day, cityId);
     }
-    return true;
-  } catch (e) {
-    throw new Error(e);
   }
 };
 

@@ -1,4 +1,5 @@
 const moment = require("moment");
+const db = require("./db/db");
 
 const getDateRange = () => {
   const currentDate = moment(new Date()).format("YYYY-MM-DD");
@@ -9,9 +10,20 @@ const getDateRange = () => {
 const successResponse = (response, data, status = 200) =>
   response.status(status).send(data);
 
-const failureResponse = (response, error, status = 400) =>
-  response.status(status).send(error);
+const failureResponse = (response, error, status = 400) => {
+  console.log(error);
+  return response.status(status).send(error);
+};
 
 const isRowExist = (data) => data.rows.length !== 0;
 
-module.exports = { getDateRange, successResponse, failureResponse, isRowExist};
+const getCityId = async (cityName) =>
+  await db.query(`SELECT id from cities WHERE name=$1;`, [cityName]);
+
+module.exports = {
+  getDateRange,
+  successResponse,
+  failureResponse,
+  isRowExist,
+  getCityId,
+};

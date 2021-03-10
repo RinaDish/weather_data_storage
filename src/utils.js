@@ -14,6 +14,13 @@ const isEqualDate = (lastDateInDbRow) => {
 
   return lastDate === currentDate;
 };
+
+const convertDate = (param) => {
+  if (param === 'today') return moment(new Date()).format('YYYY-MM-DD');
+  if (param === 'yesterday') return moment(new Date()).add(-1, 'd').format('YYYY-MM-DD');
+  return param;
+};
+
 const successResponse = (response, data, status = 200) => response.status(status).send(data);
 
 const failureResponse = (response, error, status = 400) => {
@@ -35,4 +42,5 @@ module.exports = {
   isEqualDate,
   isRowExist,
   getCityId,
+  convertDate,
 };

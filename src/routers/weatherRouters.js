@@ -5,6 +5,7 @@ const {
   failureResponse,
   isRowExist,
   getCityId,
+  convertDate,
 } = require('../utils');
 
 const router = new express.Router();
@@ -24,13 +25,14 @@ router.get('/city/list', async (req, res) => {
 
 // Get weather in the city by date
 // GET /city/London?dt=2021-03-01
-router.get('/city/:city', async (req, res) => {
+// GET /city/London?dt=today
+// GET /city/London?dt=yesterday
+router.get('/city/:city', async ({ params: { city }, query: { dt } }, res) => {
   try {
     // Get weather and update request counter
-    const cityName = req.params.city;
-    const date = req.query.dt;
+    const date = convertDate(dt);
 
-    const cityRow = await getCityId(cityName);
+    const cityRow = await getCityId(city);
     if (!isRowExist(cityRow)) return failureResponse(res, 'City not found', 404);
 
     // Increment requests field in cities table
@@ -38,7 +40,7 @@ router.get('/city/:city', async (req, res) => {
       `UPDATE cities
         SET requests = requests + 1
         WHERE name=$1;`,
-      [cityName],
+      [city],
     );
 
     const weather = await db.query(

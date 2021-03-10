@@ -75,3 +75,16 @@ test('Should NOT get weather in the city by date', async () => {
     .send()
     .expect(404);
 });
+
+test('Should increment requests field in cities table', async () => {
+  const beforeRequest = (await db.query('SELECT requests FROM cities WHERE name=$1;', [cityName])).rows[0].requests;
+
+  await request(app)
+    .get(`/city/${cityName}?dt=today`)
+    .send()
+    .expect(200);
+
+  const afterRequest = (await db.query('SELECT requests FROM cities WHERE name=$1;', [cityName])).rows[0].requests;
+
+  expect(afterRequest - beforeRequest).toBe(1);
+});

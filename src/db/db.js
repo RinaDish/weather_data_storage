@@ -5,7 +5,7 @@ const pool = new Pool({
   password: 'pigeon',
   host: 'localhost',
   port: '5432',
-  database: 'test',
+  database: 'weather_storage',
 });
 
 module.exports = pool;

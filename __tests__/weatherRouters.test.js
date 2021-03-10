@@ -6,6 +6,7 @@ const insertData = require('../src/db/inserting');
 const db = require('../src/db/db');
 
 const cityName = 'Madrid';
+const notExistingCityName = 'Hogsmeade';
 
 beforeAll(async () => {
   const forecast = await getWeatherData();
@@ -30,6 +31,15 @@ test('Should get average temperature in the city', async () => {
   expect(typeof avgTemp).toBe('number');
 });
 
+test('Should NOT get average temperature in the city', async () => {
+  const { body: { avgTemp } } = await request(app)
+    .get(`/avgtemp/${notExistingCityName}`)
+    .send()
+    .expect(404);
+
+  expect(avgTemp).toBeUndefined();
+});
+
 test('Should get the most popular city', async () => {
   const { body: { name, country } } = await request(app)
     .get('/popular')
@@ -52,4 +62,16 @@ test('Should get weather in the city by date', async () => {
   const { rows: [row] } = await db.query('SELECT id FROM cities WHERE name=$1;', [cityName]);
   const cityId = row.id;
   expect(weatherRow.city_id).toBe(cityId);
+});
+
+test('Should NOT get weather in the city by date', async () => {
+  await request(app)
+    .get(`/city/${notExistingCityName}?dt=today`)
+    .send()
+    .expect(404);
+
+  await request(app)
+    .get(`/city/${cityName}?dt=tomorrow`)
+    .send()
+    .expect(404);
 });

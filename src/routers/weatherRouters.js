@@ -1,11 +1,14 @@
 const express = require('express');
-const db = require('../db/db');
+const queries = require('../db/queries');
 const { successResponse, failureResponse } = require('../utils/responses');
 const { convertDate } = require('../utils/date');
 const {
   isRowExist,
   getCityId,
-} = require('../utils/utils');
+} = require('../utils/db');
+
+const queryToCities = queries('cities');
+const queryToWeather = queries('weather');
 
 const router = new express.Router();
 
@@ -13,7 +16,7 @@ const router = new express.Router();
 router.get('/city/list', async (req, res) => {
   try {
     // Get list of cities
-    const cities = await db.query('SELECT name, country from cities;');
+    const cities = await queryToCities.selectFields('name, country');
     if (!isRowExist(cities)) return failureResponse(res, 'Cities not found', 404);
 
     return successResponse(res, cities.rows);
@@ -36,17 +39,9 @@ router.get('/city/:city', async ({ params: { city }, query: { dt } }, res) => {
     if (!isRowExist(cityRow)) return failureResponse(res, 'City not found', 404);
 
     // Increment requests field in cities table
-    await db.query(
-      `UPDATE cities
-        SET requests = requests + 1
-        WHERE name=$1;`,
-      [city],
-    );
+    await queryToCities.incrementRequests([city]);
 
-    const weather = await db.query(
-      'SELECT * from weather WHERE city_id=$1 AND date=$2',
-      [cityRow.rows[0].id, date],
-    );
+    const weather = await queryToWeather.selectAllByDateAndCityId([date, cityRow.rows[0].id]);
 
     if (!isRowExist(weather)) return failureResponse(res, 'Weather data not found', 404);
 
@@ -63,12 +58,7 @@ router.get('/avgtemp/:city', async ({ params }, res) => {
     const cityRow = await getCityId(params.city);
     if (!isRowExist(cityRow)) return failureResponse(res, 'City not found', 404);
 
-    const avgtempRow = await db.query(
-      `SELECT AVG(CAST(avgtemp_c as float))
-        FROM weather
-        WHERE city_id=$1;`,
-      [cityRow.rows[0].id],
-    );
+    const avgtempRow = await queryToWeather.selectAvgTemp([cityRow.rows[0].id]);
     if (!isRowExist(avgtempRow)) return failureResponse(res, 'Average temperature not found', 404);
 
     // To round to 1 sign after decimal
@@ -83,13 +73,8 @@ router.get('/avgtemp/:city', async ({ params }, res) => {
 router.get('/popular', async (req, res) => {
   try {
     // Get the most popular city
-    const popularRow = await db.query(
-      `SELECT name, country
-        FROM cities
-        WHERE requests IN (SELECT MAX(requests) FROM cities GROUP BY name)
-        ORDER BY requests desc
-        LIMIT 1;`,
-    );
+    const popularRow = await queryToCities.selectBiggestRequests();
+
     if (!isRowExist(popularRow)) return failureResponse(res, 'Average temperature not found', 404);
 
     return successResponse(res, popularRow.rows[0]);

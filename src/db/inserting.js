@@ -1,31 +1,21 @@
-const db = require('./db');
+const queries = require('./queries');
+
+const queryToCities = queries('cities');
+const queryToWeather = queries('weather');
 
 const getCityId = async (city) => {
-  await db.query(
-    'INSERT INTO cities (name, country) VALUES ($1, $2) ON CONFLICT DO NOTHING;',
-    [city.name, city.country],
-  );
+  await queryToCities.insertCityRow([city.name, city.country]);
 
-  const { rows: [row] } = await db.query('SELECT * from cities WHERE name=$1;', [
-    city.name,
-  ]);
+  const { rows: [row] } = await queryToCities.selectAllByName([city.name]);
 
   return row.id;
 };
 
 // Create new weather data row if not exist
 const insertWeatherRow = async (day, cityId) => {
-  await db.query(
-    `INSERT INTO weather 
-        (date, maxtemp_c, mintemp_c, avgtemp_c, maxwind_kph, totalprecip_mm, avgvis_km, avghumidity, condition, city_id ) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) ON CONFLICT DO NOTHING;`,
-    [...Object.values(day), cityId],
-  );
+  await queryToWeather.insertWeatherRow([...Object.values(day), cityId]);
 
-  const { rows: [row] } = await db.query(
-    'SELECT * from weather WHERE date=$1 AND city_id=$2;',
-    [day.date, cityId],
-  );
+  const { rows: [row] } = await queryToWeather.selectAllByDateAndCityId([day.date, cityId]);
 
   return row;
 };

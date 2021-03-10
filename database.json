@@ -1,10 +1,20 @@
 {
     "dev": {
         "driver": "pg",
-        "user": "postgres",
-        "password": "pigeon",
-        "host": "localhost",
-        "database": "weather_storage",
-        "port": "5432"
+        "user": {
+            "ENV": "DB_USER"
+        },
+        "password": {
+            "ENV": "DB_PASS"
+        },
+        "host": {
+            "ENV": "DB_HOST"
+        },
+        "database": {
+            "ENV": "DB_NAME"
+        },
+        "port": {
+            "ENV": "DB_PORT"
+        }
     }
 }

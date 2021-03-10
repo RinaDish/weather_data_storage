@@ -1,0 +1,134 @@
+{
+	"info": {
+		"_postman_id": "c5d4b5d3-e07a-4b3a-82a0-2618dfcd88eb",
+		"name": "WeatherDataStorage",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get weather in europe capitals",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/city/europecapitals",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"city",
+						"europecapitals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List of the cities",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/city/list",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"city",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get weather in Kiev yesterday",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/city/Kiev?dt=yesterday",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"city",
+						"Kiev"
+					],
+					"query": [
+						{
+							"key": "dt",
+							"value": "yesterday"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get weather in Helsinki today",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/city/Helsinki?dt=today",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"city",
+						"Helsinki"
+					],
+					"query": [
+						{
+							"key": "dt",
+							"value": "today"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Averange temperature in the city",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/avgtemp/Minsk",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"avgtemp",
+						"Minsk"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Popular city",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/popular",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"popular"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,11 +1,10 @@
 const express = require('express');
-const queries = require('../db/queries');
 const { successResponse, failureResponse } = require('../utils/responses');
-const { convertDate } = require('../utils/date');
 const getWeatherData = require('../weather/forecast');
+const { convertDate } = require('../utils/date');
 const insertData = require('../db/inserting');
 const citiesList = require('../citiesList');
-
+const queries = require('../db/queries');
 const {
   isRowExist,
   getCityId,
@@ -16,6 +15,7 @@ const queryToWeather = queries('weather');
 
 const router = new express.Router();
 
+// Get data for cities from citiesList.js file
 router.get('/city/europecapitals', async (req, res) => {
   try {
     const forecast = await getWeatherData(citiesList);
@@ -30,7 +30,6 @@ router.get('/city/europecapitals', async (req, res) => {
 // Get list of cities
 router.get('/city/list', async (req, res) => {
   try {
-    // Get list of cities
     const cities = await queryToCities.selectFields('name, country');
     if (!isRowExist(cities)) return failureResponse(res, 'Cities not found', 404);
 
@@ -40,19 +39,17 @@ router.get('/city/list', async (req, res) => {
   }
 });
 
-// Get weather in the city by date
+// Get weather in the city by date (If the city doesn't found in DB makes new fetch to weather API)
 // GET /city/London?dt=2021-03-01
 // GET /city/London?dt=today
 // GET /city/London?dt=yesterday
 router.get('/city/:city', async ({ params: { city }, query: { dt } }, res) => {
   try {
     // Get weather and update request counter
-
     if (!dt) return failureResponse(res, 'Parameter "dt" for date is required');
     const date = convertDate(dt);
 
     let cityRow = await getCityId(city);
-
     if (!isRowExist(cityRow)) { // For providing custom city
       const forecast = await getWeatherData([city]);
       if (forecast.length === 0) return failureResponse(res, 'City not found at weather service', 404);
@@ -65,7 +62,6 @@ router.get('/city/:city', async ({ params: { city }, query: { dt } }, res) => {
     await queryToCities.incrementRequests([city]);
 
     const weather = await queryToWeather.selectAllByDateAndCityId([date, cityRow.rows[0].id]);
-
     if (!isRowExist(weather)) return failureResponse(res, 'Weather data not found', 404);
 
     return successResponse(res, weather.rows);

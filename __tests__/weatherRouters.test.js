@@ -1,10 +1,10 @@
 const request = require('supertest');
-const { getTodayDate } = require('../src/utils/date');
-const app = require('../src/app');
 const getWeatherData = require('../src/weather/forecast');
+const { getTodayDate } = require('../src/utils/date');
 const insertData = require('../src/db/inserting');
-const queries = require('../src/db/queries');
 const citiesList = require('../src/citiesList');
+const queries = require('../src/db/queries');
+const app = require('../src/app');
 
 const cityName = 'Madrid';
 const notExistingCityName = 'Hogsmeade';

@@ -1,12 +1,11 @@
 const express = require('express');
 const db = require('../db/db');
+const { successResponse, failureResponse } = require('../utils/responses');
+const { convertDate } = require('../utils/date');
 const {
-  successResponse,
-  failureResponse,
   isRowExist,
   getCityId,
-  convertDate,
-} = require('../utils');
+} = require('../utils/utils');
 
 const router = new express.Router();
 

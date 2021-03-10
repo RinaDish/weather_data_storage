@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { getDateRange } = require('../utils');
+const { getDateRange } = require('../utils/date');
 const citiesList = require('../citiesList');
 
 const forecast = (startDate, endDate) => async (location) => {

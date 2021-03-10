@@ -3,11 +3,8 @@ const weatherRouter = require('./routers/weatherRouters');
 const getWeatherData = require('./weather/forecast');
 const insertData = require('./db/inserting');
 const db = require('./db/db');
-const {
-  isEqualDate,
-  successResponse,
-  failureResponse,
-} = require('./utils');
+const { isEqualDate } = require('./utils/date');
+const { successResponse, failureResponse } = require('./utils/responses');
 
 const app = express();
 app.use(express.json());

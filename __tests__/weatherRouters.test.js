@@ -1,5 +1,5 @@
 const request = require('supertest');
-const moment = require('moment');
+const { getTodayDate } = require('../src/utils/date');
 const app = require('../src/app');
 const getWeatherData = require('../src/weather/forecast');
 const insertData = require('../src/db/inserting');
@@ -57,7 +57,7 @@ test('Should get weather in the city by date', async () => {
     .expect(200);
 
   expect(weatherRow).not.toBeUndefined();
-  expect(weatherRow.date).toMatch(moment(new Date()).format('YYYY-MM-DD'));
+  expect(weatherRow.date).toMatch(getTodayDate());
 
   const { rows: [row] } = await db.query('SELECT id FROM cities WHERE name=$1;', [cityName]);
   const cityId = row.id;

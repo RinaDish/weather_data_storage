@@ -2,6 +2,10 @@ const express = require('express');
 const queries = require('../db/queries');
 const { successResponse, failureResponse } = require('../utils/responses');
 const { convertDate } = require('../utils/date');
+const getWeatherData = require('../weather/forecast');
+const insertData = require('../db/inserting');
+const citiesList = require('../citiesList');
+
 const {
   isRowExist,
   getCityId,
@@ -11,6 +15,17 @@ const queryToCities = queries('cities');
 const queryToWeather = queries('weather');
 
 const router = new express.Router();
+
+router.get('/city/europecapitals', async (req, res) => {
+  try {
+    const forecast = await getWeatherData(citiesList);
+    await insertData(forecast);
+
+    return successResponse(res, forecast);
+  } catch (e) {
+    return failureResponse(res, e);
+  }
+});
 
 // Get list of cities
 router.get('/city/list', async (req, res) => {
@@ -32,11 +47,19 @@ router.get('/city/list', async (req, res) => {
 router.get('/city/:city', async ({ params: { city }, query: { dt } }, res) => {
   try {
     // Get weather and update request counter
+
     if (!dt) return failureResponse(res, 'Parameter "dt" for date is required');
     const date = convertDate(dt);
 
-    const cityRow = await getCityId(city);
-    if (!isRowExist(cityRow)) return failureResponse(res, 'City not found', 404);
+    let cityRow = await getCityId(city);
+
+    if (!isRowExist(cityRow)) { // For providing custom city
+      const forecast = await getWeatherData([city]);
+      if (forecast.length === 0) return failureResponse(res, 'City not found at weather service', 404);
+
+      await insertData(forecast);
+      cityRow = await getCityId(city);
+    }
 
     // Increment requests field in cities table
     await queryToCities.incrementRequests([city]);

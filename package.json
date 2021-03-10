@@ -6,7 +6,7 @@
   "scripts": {
     "start": "env-cmd -f config.env node ./src/index.js",
     "dev": "env-cmd -f config.env nodemon ./src/index.js",
-    "test": "env-cmd -f config.env jest --runInBand --detectOpenHandles --forceExit",
+    "test": "env-cmd -f config.env jest --detectOpenHandles --forceExit",
     "migration:up": "npx db-migrate up",
     "migration:down": "npx db-migrate down",
     "migration:create": "npx db-migrate create"

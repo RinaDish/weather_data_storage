@@ -4,13 +4,14 @@ const app = require('../src/app');
 const getWeatherData = require('../src/weather/forecast');
 const insertData = require('../src/db/inserting');
 const queries = require('../src/db/queries');
+const citiesList = require('../src/citiesList');
 
 const cityName = 'Madrid';
 const notExistingCityName = 'Hogsmeade';
 const queryToCities = queries('cities');
 
 beforeAll(async () => {
-  const forecast = await getWeatherData();
+  const forecast = await getWeatherData(citiesList);
   await insertData(forecast);
 }, 50000);
 

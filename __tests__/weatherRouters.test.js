@@ -5,6 +5,8 @@ const getWeatherData = require('../src/weather/forecast');
 const insertData = require('../src/db/inserting');
 const db = require('../src/db/db');
 
+const cityName = 'Madrid';
+
 beforeAll(async () => {
   const forecast = await getWeatherData();
   await insertData(forecast);
@@ -19,8 +21,26 @@ test('Should get list of cities', async () => {
   expect(body).not.toHaveLength(0);
 });
 
+test('Should get average temperature in the city', async () => {
+  const { body: { avgTemp } } = await request(app)
+    .get(`/avgtemp/${cityName}`)
+    .send()
+    .expect(200);
+
+  expect(typeof avgTemp).toBe('number');
+});
+
+test('Should get the most popular city', async () => {
+  const { body: { name, country } } = await request(app)
+    .get('/popular')
+    .send()
+    .expect(200);
+
+  expect(name).not.toBeUndefined();
+  expect(country).not.toBeUndefined();
+});
+
 test('Should get weather in the city by date', async () => {
-  const cityName = 'Madrid';
   const { body: [weatherRow] } = await request(app)
     .get(`/city/${cityName}?dt=today`)
     .send()
@@ -29,7 +49,7 @@ test('Should get weather in the city by date', async () => {
   expect(weatherRow).not.toBeUndefined();
   expect(weatherRow.date).toMatch(moment(new Date()).format('YYYY-MM-DD'));
 
-  const cityIdRow = await db.query('SELECT id FROM cities WHERE name=$1;', [cityName]);
-  const cityId = cityIdRow.rows[0].id;
+  const { rows: [row] } = await db.query('SELECT id FROM cities WHERE name=$1;', [cityName]);
+  const cityId = row.id;
   expect(weatherRow.city_id).toBe(cityId);
 });

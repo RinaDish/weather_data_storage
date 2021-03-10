@@ -6,11 +6,11 @@ const getCityId = async (city) => {
     [city.name, city.country],
   );
 
-  const cityRow = await db.query('SELECT * from cities WHERE name=$1;', [
+  const { rows: [row] } = await db.query('SELECT * from cities WHERE name=$1;', [
     city.name,
   ]);
 
-  return cityRow.rows[0].id;
+  return row.id;
 };
 
 // Create new weather data row if not exist
@@ -22,12 +22,12 @@ const insertWeatherRow = async (day, cityId) => {
     [...Object.values(day), cityId],
   );
 
-  const weatherRow = await db.query(
+  const { rows: [row] } = await db.query(
     'SELECT * from weather WHERE date=$1 AND city_id=$2;',
     [day.date, cityId],
   );
 
-  return weatherRow.rows[0];
+  return row;
 };
 
 const fulfilleWeatherTable = async (city, cityId) => {

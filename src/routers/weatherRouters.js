@@ -29,6 +29,7 @@ router.get('/city/list', async (req, res) => {
 router.get('/city/:city', async ({ params: { city }, query: { dt } }, res) => {
   try {
     // Get weather and update request counter
+    if (!dt) return failureResponse(res, 'Parameter "dt" for date is required');
     const date = convertDate(dt);
 
     const cityRow = await getCityId(city);
